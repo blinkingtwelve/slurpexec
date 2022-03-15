@@ -1,0 +1,17 @@
+[package]
+name = "slurpexec"
+version = "0.1.0"
+authors = ["nullenenenen"]
+edition = "2018"
+description = "Read stdin into specified file, then execv() the rest of the arguments"
+homepage = "https://github.com/blinkingtwelve/slurpexec"
+repository = "https://github.com/blinkingtwelve/slurpexec"
+license = "Unlicense"
+keywords = ["shell"]
+categories = ["command-line-utilities", "network-programming"]
+include = ["src/**/*", "Cargo.toml", "Cargo.lock", "LICENCE", "README.md"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nix = "0.20.0"
