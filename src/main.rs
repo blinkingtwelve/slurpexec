@@ -1,12 +1,11 @@
 use std::env::args;
 use std::ffi::{CStr, CString};
-use std::process::exit;
-use std::io;
 use std::fs::File;
+use std::io;
 use std::path::Path;
+use std::process::exit;
 
 use nix::unistd::execv;
-
 
 const USAGE: &str = r#"Invocation error. Usage example (from a shell):
 slurpexec -f /path/to/thefilestdinwillgointo /bin/cat /path/to/thefilestdinwillgointo
@@ -38,8 +37,20 @@ fn main() -> io::Result<()> {
         exit(101);
     }
     let stdin = &mut io::stdin();
-    let outfile = &mut File::create(&Path::new(&args[2]))?;
-    io::copy(stdin, outfile)?;
+    let outfile = &mut File::create(&Path::new(&args[2])).unwrap_or_else(|error| {
+        eprintln!("Can't open file '{}' for writing: {:?}", &args[2], error);
+        exit(error.raw_os_error().unwrap());
+    });
+    io::copy(stdin, outfile).unwrap_or_else(|error| {
+        eprintln!("Can't write to file '{}': {:?}", &args[2], error);
+        exit(error.raw_os_error().unwrap());
+    });
     execv_stringarray(&args[3..]);
-    panic!("Exec failed: {}", args[3..].join(" "));
+    let last_err = io::Error::last_os_error();
+    eprintln!(
+        "Execv failed with error {:?}: {}",
+        last_err,
+        args[3..].join(" ")
+    );
+    exit(last_err.raw_os_error().unwrap());
 }
